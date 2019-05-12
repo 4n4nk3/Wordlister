@@ -1,6 +1,7 @@
 # Wordlister
 A simple wordlist generator and mangler written in python.
 It makes use of python multiprocessing capabilities in order to speed up his job (CPU intensive).
+
 Permutations: Capital, Upper, Lower, 1337
 
 
