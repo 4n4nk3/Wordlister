@@ -60,12 +60,9 @@ with open(sys.argv[1], 'r') as input_file:
         input_list.add(leet_word.capitalize())
         input_list.add(leet_word.swapcase())
 
-iterators = [itertools.permutations(input_list, 2),
-             itertools.permutations(input_list, 3),
-             itertools.permutations(input_list, 4),
-             itertools.permutations(input_list, 5)]
-
 jobs = []
-for iterator in iterators:
+n_perm = 5
+for x in range(n_perm):
+    x += 1
     with multiprocessing.Pool() as pool:
-        pool.map(printer, iterator)
+        pool.map(printer, itertools.permutations(input_list, x))
