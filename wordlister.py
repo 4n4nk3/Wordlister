@@ -19,25 +19,23 @@ def printer(combo):
     line: str = ''.join(combo)
     length = len(line)
     if length >= min_length and length <= max_length:
-        duplicates = False
         for word in check_list:
             leet_word = word
             for old, new in leet_replacements:
                 leet_word = leet_word.replace(old, new)
             if line.lower().count(word) > 1:
-                duplicates = True
-            leet_line = line.lower()
-            for old, new in leet_replacements:
-                leet_line = leet_line.replace(old, new)
-            if leet_line.count(leet_word) > 1:
-                duplicates = True
-        if duplicates is False:
-            print(line)
+                return False
+        print(line)
+        # Leet
+        for old, new in leet_replacements:
+            line = line.replace(old, new)
+        print(line)
+        return True
 
 
 leet_replacements = (
-    ('o', '0'), ('a', '4'), ('a', '@'), ('b', '6'), ('e', '3'), ('g', '9'), ('i', '1'), ('i', '!'),
-    ('l', '1'), ('s', '5'), ('s', '$'), ('t', '7'))
+    ('o', '0'), ('O', '0'), ('a', '4'), ('A', '4'), ('e', '3'), ('E', '3'), ('g', '9'), ('G', '9'), ('i', '1'),
+    ('I', '1'), ('l', '1'), ('L', '1'), ('s', '5'), ('S', '5'), ('t', '7'), ('T', '7'))
 
 input_list = set()
 check_list = set()
@@ -50,15 +48,6 @@ with open(sys.argv[1], 'r') as input_file:
         input_list.add(word)
         input_list.add(word.capitalize())
         input_list.add(word.swapcase())
-        # input_list.add(word.capitalize().swapcase())
-        # Leet text
-        leet_word = word
-        for old, new in leet_replacements:
-            leet_word = leet_word.replace(old, new)
-        check_list.add(leet_word)
-        input_list.add(leet_word)
-        input_list.add(leet_word.capitalize())
-        input_list.add(leet_word.swapcase())
 
 jobs = []
 n_perm = 5
