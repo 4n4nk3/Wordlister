@@ -20,9 +20,6 @@ def printer(combo):
     length = len(line)
     if length >= min_length and length <= max_length:
         for word in check_list:
-            leet_word = word
-            for old, new in leet_replacements:
-                leet_word = leet_word.replace(old, new)
             if line.lower().count(word) > 1:
                 return False
         print(line)
