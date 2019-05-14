@@ -4,7 +4,7 @@ It makes use of python multiprocessing capabilities in order to speed up his job
 
 Permutations: Capital, Upper, Lower, 1337
 
-> Still in alpha! May crash :D
+> Still in alpha! It may crash :D
 
 * TODO: Optimize and fix memory usage.
 * TODO: Add possibility to customize mangling by passing additional parameters when calling the script.
