@@ -4,7 +4,9 @@ It makes use of python multiprocessing capabilities in order to speed up his job
 
 Permutations: Capital, Upper, Lower, 1337
 
-* TODO: Optimize memory usage.
+> Still in alpha! May crash :D
+
+* TODO: Optimize and fix memory usage.
 * TODO: Add possibility to customize mangling by passing additional parameters when calling the script.
 * TODO: Add reverse-words to mangling capabilities.
 * TODO: Add append-exclamation-mark to mangling capabilities.
