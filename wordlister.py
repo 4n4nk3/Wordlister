@@ -21,9 +21,21 @@ parser.add_argument('--prepend', help='Append chosen word (prepend \'word\' to a
 args = parser.parse_args()
 
 
-def worker(combo_worker):
-    line_worker = ''.join(combo_worker)
-    printer(check_list, line_worker)
+def printer(combo_printer):
+    line_printer = ''.join(combo_printer)
+    length_printer = len(line_printer)
+    if length_printer == 0:
+        return False
+    elif int(args.min) <= length_printer <= int(args.max):
+        if repetition_check(line_printer, check_list) is True:
+            return True
+        print(line_printer)
+        if args.append is not None:
+            print(line_printer + args.append)
+        if args.prepend is not None:
+            print(args.prepend + line_printer)
+        if args.leet is True:
+            leet(leet_replacements, line_printer)
     return True
 
 
@@ -39,10 +51,10 @@ def slice_and_run(single_iterator):
             cake_slice = itertools.islice(single_iterator, start, None)
         if args.cores is None:
             with Pool() as pool:
-                data = pool.map(worker, cake_slice)
+                data = pool.map(printer, cake_slice)
         else:
             with Pool(int(args.cores)) as pool:
-                data = pool.map(worker, cake_slice)
+                data = pool.map(printer, cake_slice)
         start += step
         stop += step
         if next_it is True:
@@ -51,61 +63,67 @@ def slice_and_run(single_iterator):
             next_it = True
 
 
+def leet(leet_replacements_leet, line_leet):
+    for old_printer, new_printer in leet_replacements_leet:
+        line_leet = line_leet.replace(old_printer, new_printer)
+    print(line_leet)
+    if args.append is not None:
+        print(line_leet + args.append)
+    if args.prepend is not None:
+        print(args.prepend + line_leet)
+
+
 def repetition_check(line_repetition: str, check_list_repetition):
-    for word_check in check_list_repetition:
-        if line_repetition.lower().count(word_check) > 1:
+    for word_check_printer in check_list_repetition:
+        if line_repetition.lower().count(word_check_printer) > 1:
             return True
     return False
 
 
-def leet(check_list_leet,leet_replacements_leet, line_leet, out_counter_leet, trigger_counter_leet=False):
-    line_leet_old = line_leet
-    for old_leet, new_leet in leet_replacements_leet:
-        line_leet = line_leet.replace(old_leet, new_leet)
-    if line_leet != line_leet_old:
-        out_counter_leet = printer(check_list_leet, line_leet, out_counter_leet, trigger_counter_leet)
-    return out_counter_leet
-
-
-def test(check_list_test, x_test, out_counter_test):
+def test(x_test, out_counter_test):
     for combo in itertools.permutations(input_list, x_test + 1):
+        skip = False
         line = ''.join(combo)
-        out_counter_test += printer(check_list_test, line, out_counter_test, True)
-        if out_counter_test >= int(args.test):
-            return out_counter_test
+        length = len(line)
+        if length == 0:
+            pass
+        elif int(args.min) <= length <= int(args.max):
+            for word_check in check_list:
+                if line.lower().count(word_check) > 1:
+                    skip = True
+            if skip is False:
+                print(line)
+                out_counter_test += 1
+                if out_counter_test >= int(args.test):
+                    return out_counter_test
+                if args.append is not None:
+                    print(line + args.append)
+                    out_counter_test += 1
+                    if out_counter_test >= int(args.test):
+                        return out_counter_test
+                if args.prepend is not None:
+                    print(args.prepend + line)
+                    out_counter_test += 1
+                    if out_counter_test >= int(args.test):
+                        return out_counter_test
+                if args.leet is True:
+                    for old, new in leet_replacements:
+                        line = line.replace(old, new)
+                    print(line)
+                    out_counter_test += 1
+                    if out_counter_test >= int(args.test):
+                        return out_counter_test
+                    if args.append is not None:
+                        print(line + args.append)
+                        out_counter_test += 1
+                        if out_counter_test >= int(args.test):
+                            return out_counter_test
+                    if args.prepend is not None:
+                        print(args.prepend + line)
+                        out_counter_test += 1
+                        if out_counter_test >= int(args.test):
+                            return out_counter_test
     return out_counter_test
-
-
-def printer(check_list_printer, line_printer, out_counter=0, trigger_counter=False, leet_trigger=True):
-    length_worker = len(line_printer)
-    if length_worker == 0:
-        return out_counter
-    elif int(args.min) <= length_worker <= int(args.max):
-        if repetition_check(line_printer, check_list_printer) is True:
-            return out_counter
-        print(line_printer)
-        if trigger_counter is True:
-            out_counter += 1
-            if out_counter >= int(args.test):
-                return out_counter
-        if args.append is not None:
-            print(line_printer + args.append)
-            if trigger_counter is True:
-                out_counter += 1
-                if out_counter >= int(args.test):
-                    return out_counter
-        if args.prepend is not None:
-            print(args.prepend + line_printer)
-            if trigger_counter is True:
-                out_counter += 1
-                if out_counter >= int(args.test):
-                    return out_counter
-        if args.leet is True and leet_trigger is True:
-            if trigger_counter is False:
-                out_counter += leet(check_list_printer, leet_replacements, line_printer, out_counter)
-            else:
-                out_counter += leet(check_list_printer, leet_replacements, line_printer, out_counter, True)
-    return out_counter
 
 
 leet_replacements = (
@@ -126,10 +144,10 @@ with open(args.input, 'r') as input_file:
             input_list.add(word.upper())
 
 if args.test is not None:
-    counter = 0
+    out_counter = 0
     for x in range(int(args.perm)):
-        counter = test(check_list, x, counter)
-        if counter >= int(args.test):
+        out_counter = test(x, out_counter)
+        if out_counter >= int(args.test):
             break
 else:
     for x in range(int(args.perm)):
