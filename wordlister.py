@@ -20,13 +20,17 @@ parser.add_argument('--prepend', help='Append chosen word (prepend \'word\' to a
 
 args = parser.parse_args()
 
+leet_replacements = (
+    ('o', '0'), ('O', '0'), ('a', '4'), ('A', '4'), ('e', '3'), ('E', '3'), ('i', '1'), ('I', '1'), ('s', '5'),
+    ('S', '5'))
 
-def printer(combo_printer):
+input_list = set()
+check_list = set()
+
+def printer(combo_printer: str):
+    """Print generated words to stdout and in case apply chosen mutagens (append, prepend, leet)."""
     line_printer = ''.join(combo_printer)
-    length_printer = len(line_printer)
-    if length_printer == 0:
-        return False
-    elif int(args.min) <= length_printer <= int(args.max):
+    if int(args.min) <= len(line_printer) <= int(args.max):
         if repetition_check(line_printer, check_list) is True:
             return True
         print(line_printer)
@@ -39,10 +43,12 @@ def printer(combo_printer):
     return True
 
 
-def slice_and_run(single_iterator):
+def slice_and_run(single_iterator: itertools.permutations):
+    """Makes slices from iterator and process them via a process pool."""
     step = 10000000
     start = 0
     stop = start + step
+    # I use next_it bool to make sure to create one more slice with no end limit when slices are finished
     next_it = False
     while 1:
         if next_it is False:
@@ -63,7 +69,8 @@ def slice_and_run(single_iterator):
             next_it = True
 
 
-def leet(leet_replacements_leet, line_leet):
+def leet(leet_replacements_leet: tuple, line_leet: str):
+    """Apply leet mutagen and then if needed apply append and prepend to leeted version of the string."""
     for old_printer, new_printer in leet_replacements_leet:
         line_leet = line_leet.replace(old_printer, new_printer)
     print(line_leet)
@@ -73,21 +80,20 @@ def leet(leet_replacements_leet, line_leet):
         print(args.prepend + line_leet)
 
 
-def repetition_check(line_repetition: str, check_list_repetition):
+def repetition_check(line_repetition: str, check_list_repetition: set):
+    """Make sure there are not repeated words in the string. Return True if repetitions are present."""
     for word_check_printer in check_list_repetition:
         if line_repetition.lower().count(word_check_printer) > 1:
             return True
     return False
 
 
-def test(x_test, out_counter_test):
+def test(x_test: int, out_counter_test: int):
+    """Test run to generate only N words."""
     for combo in itertools.permutations(input_list, x_test + 1):
         skip = False
         line = ''.join(combo)
-        length = len(line)
-        if length == 0:
-            pass
-        elif int(args.min) <= length <= int(args.max):
+        if int(args.min) <= len(line) <= int(args.max):
             for word_check in check_list:
                 if line.lower().count(word_check) > 1:
                     skip = True
@@ -125,24 +131,19 @@ def test(x_test, out_counter_test):
                             return out_counter_test
     return out_counter_test
 
-
-leet_replacements = (
-    ('o', '0'), ('O', '0'), ('a', '4'), ('A', '4'), ('e', '3'), ('E', '3'), ('i', '1'), ('I', '1'), ('s', '5'),
-    ('S', '5'))
-
-input_list = set()
-check_list = set()
-
+# Read input file and create a check list for duplicates checks
 with open(args.input, 'r') as input_file:
     for row in input_file:
         word = row.rstrip('\n')
         check_list.add(word)
         input_list.add(word)
+        # Apply capitalize mutage and upper mutagen if needed
         if args.cap is True:
             input_list.add(word.capitalize())
         if args.up is True:
             input_list.add(word.upper())
 
+# Test run or real run
 if args.test is not None:
     out_counter = 0
     for x in range(int(args.perm)):
