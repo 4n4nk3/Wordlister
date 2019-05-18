@@ -3,18 +3,20 @@ A simple wordlist generator and mangler written in python.
 It makes use of python multiprocessing capabilities in order to speed up his job (CPU intensive).
 
 
-Supported permutations:
+### Supported permutations:
  - [x] Capital
  - [x] Upper
  - [x] 1337
  - [x] Append
  - [x] Prepend
 
-Additional functions:
+### Additional functions:
  - [x] Test/Dry run
  - [x] Multiprocessing
  - [x] Multicore
  - [x] Possibility to adjust cores/processes number manually
+ 
+### Preview:
 
 ```
 usage: wordlister.py [-h] --input INPUT --perm PERM --min MIN --max MAX
