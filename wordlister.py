@@ -50,7 +50,7 @@ def slice_and_run(single_iterator: itertools.permutations):
     stop = start + step
     # I use next_it bool to make sure to create one more slice with no end limit when slices are finished
     next_it = False
-    while 1:
+    while True:
         if next_it is False:
             cake_slice = itertools.islice(single_iterator, start, stop)
         else:
@@ -65,7 +65,7 @@ def slice_and_run(single_iterator: itertools.permutations):
         stop += step
         if next_it is True:
             break
-        if len(data) == 0:
+        if not data:
             next_it = True
 
 
@@ -97,6 +97,7 @@ def test(x_test: int, out_counter_test: int):
             for word_check in check_list:
                 if line.lower().count(word_check) > 1:
                     skip = True
+                    break
             if skip is False:
                 print(line)
                 out_counter_test += 1
