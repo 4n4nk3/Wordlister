@@ -1,4 +1,9 @@
-import itertools
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+"""Wordlister, a simple wordlist generator and mangler written in python.\n"""
+
+# Written By Ananke: https://github.com/4n4nk3
+from itertools import permutations, islice
 from multiprocessing import Pool
 import argparse
 
@@ -27,24 +32,24 @@ leet_replacements = (
 input_list = set()
 check_list = set()
 
-def printer(combo_printer: str):
-    """Print generated words to stdout and in case apply chosen mutagens (append, prepend, leet)."""
-    line_printer = ''.join(combo_printer)
-    if int(args.min) <= len(line_printer) <= int(args.max):
-        if repetition_check(line_printer, check_list) is True:
-            return True
-        print(line_printer)
-        if args.append is not None:
-            print(line_printer + args.append)
-        if args.prepend is not None:
-            print(args.prepend + line_printer)
-        if args.leet is True:
-            leet(leet_replacements, line_printer)
+
+def printer(combo_printer: list):
+    """Print generated words to stdout and in case apply chosen mutagens (append, prepend, leet).\n"""
+    if len(set(map(str.lower, combo_printer))) == len(combo_printer):
+        line_printer = ''.join(combo_printer)
+        if int(args.min) <= len(line_printer) <= int(args.max):
+            print(line_printer)
+            if args.append is not None:
+                print(line_printer + args.append)
+            if args.prepend is not None:
+                print(args.prepend + line_printer)
+            if args.leet is True:
+                leet(line_printer)
     return True
 
 
-def slice_and_run(single_iterator: itertools.permutations):
-    """Makes slices from iterator and process them via a process pool."""
+def slice_and_run(single_iterator: permutations):
+    """Makes slices from iterator and process them via a process pool.\n"""
     step = 10000000
     start = 0
     stop = start + step
@@ -52,9 +57,9 @@ def slice_and_run(single_iterator: itertools.permutations):
     next_it = False
     while True:
         if next_it is False:
-            cake_slice = itertools.islice(single_iterator, start, stop)
+            cake_slice = islice(single_iterator, start, stop)
         else:
-            cake_slice = itertools.islice(single_iterator, start, None)
+            cake_slice = islice(single_iterator, start, None)
         if args.cores is None:
             with Pool() as pool:
                 data = pool.map(printer, cake_slice)
@@ -69,9 +74,9 @@ def slice_and_run(single_iterator: itertools.permutations):
             next_it = True
 
 
-def leet(leet_replacements_leet: tuple, line_leet: str):
-    """Apply leet mutagen and then if needed apply append and prepend to leeted version of the string."""
-    for old_printer, new_printer in leet_replacements_leet:
+def leet(line_leet: str):
+    """Apply leet mutagen and then if needed apply append and prepend to leeted version of the string.\n"""
+    for old_printer, new_printer in leet_replacements:
         line_leet = line_leet.replace(old_printer, new_printer)
     print(line_leet)
     if args.append is not None:
@@ -80,25 +85,12 @@ def leet(leet_replacements_leet: tuple, line_leet: str):
         print(args.prepend + line_leet)
 
 
-def repetition_check(line_repetition: str, check_list_repetition: set):
-    """Make sure there are not repeated words in the string. Return True if repetitions are present."""
-    for word_check_printer in check_list_repetition:
-        if line_repetition.lower().count(word_check_printer) > 1:
-            return True
-    return False
-
-
 def test(x_test: int, out_counter_test: int):
-    """Test run to generate only N words."""
-    for combo in itertools.permutations(input_list, x_test + 1):
-        skip = False
-        line = ''.join(combo)
-        if int(args.min) <= len(line) <= int(args.max):
-            for word_check in check_list:
-                if line.lower().count(word_check) > 1:
-                    skip = True
-                    break
-            if skip is False:
+    """Test run to generate only N words.\n"""
+    for combo in permutations(input_list, x_test + 1):
+        if len(set(map(str.lower, combo))) == len(combo):
+            line = ''.join(combo)
+            if int(args.min) <= len(line) <= int(args.max):
                 print(line)
                 out_counter_test += 1
                 if out_counter_test >= int(args.test):
@@ -132,13 +124,14 @@ def test(x_test: int, out_counter_test: int):
                             return out_counter_test
     return out_counter_test
 
+
 # Read input file and create a check list for duplicates checks
 with open(args.input, 'r') as input_file:
     for row in input_file:
         word = row.rstrip('\n')
         check_list.add(word)
         input_list.add(word)
-        # Apply capitalize mutage and upper mutagen if needed
+        # Apply capitalize mutagen and upper mutagen if needed
         if args.cap is True:
             input_list.add(word.capitalize())
         if args.up is True:
@@ -153,4 +146,4 @@ if args.test is not None:
             break
 else:
     for x in range(int(args.perm)):
-        slice_and_run(itertools.permutations(input_list, x + 1))
+        slice_and_run(permutations(input_list, x + 1))

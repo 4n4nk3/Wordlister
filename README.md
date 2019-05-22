@@ -14,7 +14,8 @@ It makes use of python multiprocessing capabilities in order to speed up his job
  - [x] Test/Dry run
  - [x] Multiprocessing
  - [x] Multicore
- - [x] Possibility to adjust cores/processes number manually
+ - [x] Possibility to adjust cores/processes number manually.
+ - [x] Each generated password doesnt contain same word twice.
  
 ### Preview:
 
