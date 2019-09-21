@@ -126,16 +126,20 @@ def test(x_test: int, out_counter_test: int):
 
 
 # Read input file and create a check list for duplicates checks
-with open(args.input, 'r') as input_file:
-    for row in input_file:
-        word = row.rstrip('\n')
-        check_list.add(word)
-        input_list.add(word)
-        # Apply capitalize mutagen and upper mutagen if needed
-        if args.cap is True:
-            input_list.add(word.capitalize())
-        if args.up is True:
-            input_list.add(word.upper())
+try:
+    with open(args.input, 'r') as input_file:
+        for row in input_file:
+            word = row.rstrip('\n')
+            check_list.add(word)
+            input_list.add(word)
+            # Apply capitalize mutagen and upper mutagen if needed
+            if args.cap is True:
+                input_list.add(word.capitalize())
+            if args.up is True:
+                input_list.add(word.upper())
+except Exception as exception:
+    if type(exception) == FileNotFoundError:
+        print('Input file not found!\nExiting...')
 
 # Test run or real run
 if args.test is not None:
