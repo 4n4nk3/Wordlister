@@ -7,37 +7,37 @@ from itertools import permutations, islice
 from multiprocessing import Pool
 import argparse
 
-parser = argparse.ArgumentParser(description='A simple wordlist generator and mangler written in python.')
-required = parser.add_argument_group('required arguments')
-# Required arguments
-required.add_argument('--input', help='Input file name', required=True)
-required.add_argument('--perm', help='Max number of words to be combined on the same line', required=True)
-required.add_argument('--min', help='Minimum generated password length', required=True)
-required.add_argument('--max', help='Maximum generated password length', required=True)
-# Optional arguments
-parser.add_argument('--test', help='Output first N iterations (single process/core)', required=False)
-parser.add_argument('--cores', help='Manually specify processes/cores pool that you want to use', required=False)
-parser.add_argument('--leet', help='Activate l33t mutagen', action='store_true')
-parser.add_argument('--cap', help='Activate capitalize mutagen', action='store_true')
-parser.add_argument('--up', help='Activate uppercase mutagen', action='store_true')
-parser.add_argument('--append', help='Append chosen word (append \'word\' to all passwords)', required=False)
-parser.add_argument('--prepend', help='Append chosen word (prepend \'word\' to all passwords)', required=False)
-
-args = parser.parse_args()
-
 leet_replacements = (
     ('o', '0'), ('O', '0'), ('a', '4'), ('A', '4'), ('e', '3'), ('E', '3'), ('i', '1'), ('I', '1'), ('s', '5'),
     ('S', '5'))
 
 input_list = set()
-check_list = set()
+
+def init_argparse() -> argparse.ArgumentParser:
+    """Define and manage arguments passed to Wordlister via terminal.\n"""
+    parser = argparse.ArgumentParser(description='A simple wordlist generator and mangler written in python.')
+    required = parser.add_argument_group('required arguments')
+    # Required arguments
+    required.add_argument('--input', help='Input file name', required=True)
+    required.add_argument('--perm', help='Max number of words to be combined on the same line', required=True, type=int)
+    required.add_argument('--min', help='Minimum generated password length', required=True, type=int)
+    required.add_argument('--max', help='Maximum generated password length', required=True, type=int)
+    # Optional arguments
+    parser.add_argument('--test', help='Output first N iterations (single process/core)', required=False, type=int)
+    parser.add_argument('--cores', help='Manually specify processes/cores pool that you want to use', required=False, type=int)
+    parser.add_argument('--leet', help='Activate l33t mutagen', action='store_true')
+    parser.add_argument('--cap', help='Activate capitalize mutagen', action='store_true')
+    parser.add_argument('--up', help='Activate uppercase mutagen', action='store_true')
+    parser.add_argument('--append', help='Append chosen word (append \'word\' to all passwords)', required=False)
+    parser.add_argument('--prepend', help='Append chosen word (prepend \'word\' to all passwords)', required=False)
+    return parser
 
 
 def printer(combo_printer: list):
     """Print generated words to stdout and in case apply chosen mutagens (append, prepend, leet).\n"""
     if len(set(map(str.lower, combo_printer))) == len(combo_printer):
         line_printer = ''.join(combo_printer)
-        if int(args.min) <= len(line_printer) <= int(args.max):
+        if args.min <= len(line_printer) <= args.max:
             print(line_printer)
             if args.append is not None:
                 print(line_printer + args.append)
@@ -64,7 +64,7 @@ def slice_and_run(single_iterator: permutations):
             with Pool() as pool:
                 data = pool.map(printer, cake_slice)
         else:
-            with Pool(int(args.cores)) as pool:
+            with Pool(args.cores) as pool:
                 data = pool.map(printer, cake_slice)
         start += step
         stop += step
@@ -90,47 +90,48 @@ def test(x_test: int, out_counter_test: int):
     for combo in permutations(input_list, x_test + 1):
         if len(set(map(str.lower, combo))) == len(combo):
             line = ''.join(combo)
-            if int(args.min) <= len(line) <= int(args.max):
+            if args.min <= len(line) <= args.max:
                 print(line)
                 out_counter_test += 1
-                if out_counter_test >= int(args.test):
+                if out_counter_test >= args.test:
                     return out_counter_test
                 if args.append is not None:
                     print(line + args.append)
                     out_counter_test += 1
-                    if out_counter_test >= int(args.test):
+                    if out_counter_test >= args.test:
                         return out_counter_test
                 if args.prepend is not None:
                     print(args.prepend + line)
                     out_counter_test += 1
-                    if out_counter_test >= int(args.test):
+                    if out_counter_test >= args.test:
                         return out_counter_test
                 if args.leet is True:
                     for old, new in leet_replacements:
                         line = line.replace(old, new)
                     print(line)
                     out_counter_test += 1
-                    if out_counter_test >= int(args.test):
+                    if out_counter_test >= args.test:
                         return out_counter_test
                     if args.append is not None:
                         print(line + args.append)
                         out_counter_test += 1
-                        if out_counter_test >= int(args.test):
+                        if out_counter_test >= args.test:
                             return out_counter_test
                     if args.prepend is not None:
                         print(args.prepend + line)
                         out_counter_test += 1
-                        if out_counter_test >= int(args.test):
+                        if out_counter_test >= args.test:
                             return out_counter_test
     return out_counter_test
 
+
+args = init_argparse().parse_args()
 
 # Read input file and create a check list for duplicates checks
 try:
     with open(args.input, 'r') as input_file:
         for row in input_file:
             word = row.rstrip('\n')
-            check_list.add(word)
             input_list.add(word)
             # Apply capitalize mutagen and upper mutagen if needed
             if args.cap is True:
@@ -144,10 +145,10 @@ except Exception as exception:
 # Test run or real run
 if args.test is not None:
     out_counter = 0
-    for x in range(int(args.perm)):
+    for x in range(args.perm):
         out_counter = test(x, out_counter)
-        if out_counter >= int(args.test):
+        if out_counter >= args.test:
             break
 else:
-    for x in range(int(args.perm)):
+    for x in range(args.perm):
         slice_and_run(permutations(input_list, x + 1))
