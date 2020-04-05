@@ -127,7 +127,7 @@ def test(x_test: int, out_counter_test: int):
 
 args = init_argparse().parse_args()
 
-# Read input file and create a check list for duplicates checks
+# Read input file
 try:
     with open(args.input, 'r') as input_file:
         for row in input_file:
