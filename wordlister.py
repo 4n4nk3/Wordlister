@@ -7,29 +7,33 @@ from itertools import permutations, islice
 from multiprocessing import Pool
 import argparse
 
-leet_replacements = (
-    ('o', '0'), ('O', '0'), ('a', '4'), ('A', '4'), ('e', '3'), ('E', '3'), ('i', '1'), ('I', '1'), ('s', '5'),
-    ('S', '5'))
-
-input_list = set()
 
 def init_argparse() -> argparse.ArgumentParser:
     """Define and manage arguments passed to Wordlister via terminal.\n"""
-    parser = argparse.ArgumentParser(description='A simple wordlist generator and mangler written in python.')
+    parser = argparse.ArgumentParser(
+        description='A simple wordlist generator and mangler written in python.')
     required = parser.add_argument_group('required arguments')
     # Required arguments
     required.add_argument('--input', help='Input file name', required=True)
-    required.add_argument('--perm', help='Max number of words to be combined on the same line', required=True, type=int)
-    required.add_argument('--min', help='Minimum generated password length', required=True, type=int)
-    required.add_argument('--max', help='Maximum generated password length', required=True, type=int)
+    required.add_argument('--perm', help='Max number of words to be combined on the same line',
+                          required=True, type=int)
+    required.add_argument('--min', help='Minimum generated password length', required=True,
+                          type=int)
+    required.add_argument('--max', help='Maximum generated password length', required=True,
+                          type=int)
     # Optional arguments
-    parser.add_argument('--test', help='Output first N iterations (single process/core)', required=False, type=int)
-    parser.add_argument('--cores', help='Manually specify processes/cores pool that you want to use', required=False, type=int)
+    parser.add_argument('--test', help='Output first N iterations (single process/core)',
+                        required=False, type=int)
+    parser.add_argument('--cores',
+                        help='Manually specify processes/cores pool that you want to use',
+                        required=False, type=int)
     parser.add_argument('--leet', help='Activate l33t mutagen', action='store_true')
     parser.add_argument('--cap', help='Activate capitalize mutagen', action='store_true')
     parser.add_argument('--up', help='Activate uppercase mutagen', action='store_true')
-    parser.add_argument('--append', help='Append chosen word (append \'word\' to all passwords)', required=False)
-    parser.add_argument('--prepend', help='Append chosen word (prepend \'word\' to all passwords)', required=False)
+    parser.add_argument('--append', help='Append chosen word (append \'word\' to all passwords)',
+                        required=False)
+    parser.add_argument('--prepend', help='Append chosen word (prepend \'word\' to all passwords)',
+                        required=False)
     return parser
 
 
@@ -76,8 +80,13 @@ def slice_and_run(single_iterator: permutations):
 
 def leet(line_leet: str):
     """Apply leet mutagen and then if needed apply append and prepend to leeted version of the string.\n"""
-    for old_printer, new_printer in leet_replacements:
-        line_leet = line_leet.replace(old_printer, new_printer)
+    def my_replace(line_to_mutate):
+        leet_replacements = (('o', '0'), ('O', '0'), ('a', '4'), ('A', '4'), ('e', '3'), ('E', '3'),
+                             ('i', '1'), ('I', '1'), ('s', '5'), ('S', '5'))
+        for old_printer, new_printer in leet_replacements:
+            line_to_mutate = line_to_mutate.replace(old_printer, new_printer)
+        return line_to_mutate
+    line_leet = my_replace(line_leet)
     print(line_leet)
     if args.append is not None:
         print(line_leet + args.append)
@@ -85,8 +94,11 @@ def leet(line_leet: str):
         print(args.prepend + line_leet)
 
 
-def test(x_test: int, out_counter_test: int):
-    """Test run to generate only N words.\n"""
+def test_printer(x_test: int, out_counter_test: int):
+    """Test printer.\n"""
+    input_list = read_input_file(args.input)
+    leet_replacements = (('o', '0'), ('O', '0'), ('a', '4'), ('A', '4'), ('e', '3'), ('E', '3'),
+                         ('i', '1'), ('I', '1'), ('s', '5'), ('S', '5'))
     for combo in permutations(input_list, x_test + 1):
         if len(set(map(str.lower, combo))) == len(combo):
             line = ''.join(combo)
@@ -125,30 +137,47 @@ def test(x_test: int, out_counter_test: int):
     return out_counter_test
 
 
-args = init_argparse().parse_args()
-
-# Read input file
-try:
-    with open(args.input, 'r') as input_file:
-        for row in input_file:
-            word = row.rstrip('\n')
-            input_list.add(word)
-            # Apply capitalize mutagen and upper mutagen if needed
-            if args.cap is True:
-                input_list.add(word.capitalize())
-            if args.up is True:
-                input_list.add(word.upper())
-except Exception as exception:
-    if type(exception) == FileNotFoundError:
+def read_input_file(file_path):
+    """Read input file and return a set of words.\n"""
+    input_list = set()
+    try:
+        with open(file_path, 'r') as input_file:
+            for row in input_file:
+                word = row.rstrip('\n')
+                input_list.add(word)
+                # Apply capitalize mutagen and upper mutagen if needed
+                if args.cap is True:
+                    input_list.add(word.capitalize())
+                if args.up is True:
+                    input_list.add(word.upper())
+    except FileNotFoundError:
         print('Input file not found!\nExiting...')
+    return input_list
+
+
+def test_run():
+    """Test run to generate only N words.\n"""
+    out_counter = 0
+    n_perm = args.perm
+    n_test = args.test
+    for x in range(n_perm):
+        out_counter = test_printer(x, out_counter)
+        if out_counter >= n_test:
+            break
+
+
+def real_run():
+    """Real run.\n"""
+    input_list = read_input_file(args.input)
+    n_perm = args.perm
+    for x in range(n_perm):
+        slice_and_run(permutations(input_list, x + 1))
+
+
+args = init_argparse().parse_args()
 
 # Test run or real run
 if args.test is not None:
-    out_counter = 0
-    for x in range(args.perm):
-        out_counter = test(x, out_counter)
-        if out_counter >= args.test:
-            break
+    test_run()
 else:
-    for x in range(args.perm):
-        slice_and_run(permutations(input_list, x + 1))
+    real_run()
