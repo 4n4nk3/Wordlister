@@ -78,14 +78,16 @@ def slice_and_run(single_iterator: permutations):
             next_it = True
 
 
+def my_replace(line_to_mutate):
+    leet_replacements = (('o', '0'), ('O', '0'), ('a', '4'), ('A', '4'), ('e', '3'), ('E', '3'),
+                         ('i', '1'), ('I', '1'), ('s', '5'), ('S', '5'))
+    for old_printer, new_printer in leet_replacements:
+        line_to_mutate = line_to_mutate.replace(old_printer, new_printer)
+    return line_to_mutate
+
+
 def leet(line_leet: str):
     """Apply leet mutagen and then if needed apply append and prepend to leeted version of the string.\n"""
-    def my_replace(line_to_mutate):
-        leet_replacements = (('o', '0'), ('O', '0'), ('a', '4'), ('A', '4'), ('e', '3'), ('E', '3'),
-                             ('i', '1'), ('I', '1'), ('s', '5'), ('S', '5'))
-        for old_printer, new_printer in leet_replacements:
-            line_to_mutate = line_to_mutate.replace(old_printer, new_printer)
-        return line_to_mutate
     line_leet = my_replace(line_leet)
     print(line_leet)
     if args.append is not None:
@@ -97,8 +99,6 @@ def leet(line_leet: str):
 def test_printer(x_test: int, out_counter_test: int):
     """Test printer.\n"""
     input_list = read_input_file(args.input)
-    leet_replacements = (('o', '0'), ('O', '0'), ('a', '4'), ('A', '4'), ('e', '3'), ('E', '3'),
-                         ('i', '1'), ('I', '1'), ('s', '5'), ('S', '5'))
     for combo in permutations(input_list, x_test + 1):
         if len(set(map(str.lower, combo))) == len(combo):
             line = ''.join(combo)
@@ -118,8 +118,7 @@ def test_printer(x_test: int, out_counter_test: int):
                     if out_counter_test >= args.test:
                         return out_counter_test
                 if args.leet is True:
-                    for old, new in leet_replacements:
-                        line = line.replace(old, new)
+                    line = my_replace(line)
                     print(line)
                     out_counter_test += 1
                     if out_counter_test >= args.test:
