@@ -1,8 +1,8 @@
 #!/usr/bin/python3
 """Wordlister, a simple wordlist generator and mangler written in python 3.8."""
+# Written By Ananke: https://github.com/4n4nk3
 
 import argparse
-# Written By Ananke: https://github.com/4n4nk3
 from itertools import islice, permutations
 from multiprocessing import Pool
 from sys import exit
