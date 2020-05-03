@@ -5,8 +5,11 @@
 import argparse
 from itertools import islice, permutations
 from multiprocessing import Pool
+from os import remove
 from sys import exit
 
+TEMP_OUTPUT_FILE = 'temp-output.txt'
+OUTPUT_FILE = 'output.txt'
 
 def init_argparse() -> argparse.ArgumentParser:
     """Define and manage arguments passed to Wordlister via terminal."""
@@ -37,31 +40,41 @@ def init_argparse() -> argparse.ArgumentParser:
     return parser
 
 
-def printer(combo_printer: list) -> bool:
+def printer(combo_printer: list) -> set:
     """Print generated words to stdout and in case apply chosen mutagens (append, prepend, leet)."""
+    data = set()
     if len(set(map(str.lower, combo_printer))) == len(combo_printer):
         line_printer = ''.join(combo_printer)
         if args.min <= len(line_printer) <= args.max:
-            print(line_printer)
+            data.add(line_printer)
             if args.append is not None and len(line_printer) + len(args.append) <= args.max:
-                print(f'{line_printer}{args.append}')
+                data.add(f'{line_printer}{args.append}')
             if args.prepend is not None and len(line_printer) + len(args.prepend) <= args.max:
-                print(f'{args.prepend}{line_printer}')
+                data.add(f'{args.prepend}{line_printer}')
             if args.leet is True:
-                leet(line_printer)
-    return True
+                for x in leet(line_printer):
+                    data.add(x)
+    if data:
+        return data
 
 
 def slice_and_run(single_iterator: iter):
     """Makes slices from iterator and process them via a process pool."""
     step = 10000000
     start = 0
-    data = True
-    with Pool(args.cores) as pool:
-        while data:
-            cake_slice = islice(single_iterator, start, start + step)
-            data = pool.map(printer, cake_slice)
-            start += step
+    check = True
+    with open(TEMP_OUTPUT_FILE, 'a') as out_f:
+        with Pool(args.cores) as pool:
+            while check:
+                check = False
+                cake_slice = islice(single_iterator, start, start + step)
+                data = (result for result in pool.map(printer, cake_slice) if result is not None)
+                for result in data:
+                    if result:
+                        check = True
+                    for word in result:
+                        out_f.write(f'{word}\n')
+                start += step
 
 
 def my_replace(line_to_mutate: str) -> str:
@@ -72,14 +85,16 @@ def my_replace(line_to_mutate: str) -> str:
     return line_to_mutate
 
 
-def leet(line_leet: str):
+def leet(line_leet: str) -> list:
     """Apply leet mutagen and then if needed apply append and prepend to leeted version of the string."""
+    data = []
     line_leet = my_replace(line_leet)
-    print(line_leet)
+    data.append(line_leet)
     if args.append is not None:
-        print(f'{line_leet}{args.append}')
+        data.append(f'{line_leet}{args.append}')
     if args.prepend is not None:
-        print(f'{args.prepend}{line_leet}')
+        data.append(f'{args.prepend}{line_leet}')
+    return data
 
 
 def test_printer(x_test: int, out_counter_test: int) -> int:
@@ -165,4 +180,15 @@ args = init_argparse().parse_args()
 if args.test is not None:
     test_run()
 else:
+    open(OUTPUT_FILE, 'w').write('')
+    open(TEMP_OUTPUT_FILE, 'w').write('')
     real_run()
+    definitive = set()
+    with open(TEMP_OUTPUT_FILE, 'r') as f_in:
+        with open(OUTPUT_FILE, 'a') as f_out:
+            for line in f_in:
+                if line not in definitive:
+                    definitive.add(line)
+                    f_out.write(line)
+    remove(TEMP_OUTPUT_FILE)
+    print('\nOutput saved to \'output.txt\'!\n')
