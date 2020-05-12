@@ -1,5 +1,5 @@
 # Wordlister
-A simple wordlist generator and mangler written in python.
+A simple wordlist generator and mangler written in python 3.8.
 It makes use of python multiprocessing capabilities in order to speed up his job (CPU intensive).
 
 
