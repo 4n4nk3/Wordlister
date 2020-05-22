@@ -7,12 +7,20 @@ from itertools import islice, permutations
 from multiprocessing import Pool
 from os import remove
 from sys import exit
+from typing import Iterator, List
 
 TEMP_OUTPUT_FILE = 'temp-output.txt'
 OUTPUT_FILE = 'output.txt'
+LEET_TRANSLATIONS = str.maketrans('oOaAeEiIsS', '0044331155')
+
 
 def init_argparse() -> argparse.ArgumentParser:
-    """Define and manage arguments passed to Wordlister via terminal."""
+    """
+    Define and manage arguments passed to Wordlister via terminal.
+
+    :return argparse.ArgumentParser
+    """
+
     parser = argparse.ArgumentParser(
         description='A simple wordlist generator and mangler written in python.')
     required = parser.add_argument_group('required arguments')
@@ -40,8 +48,14 @@ def init_argparse() -> argparse.ArgumentParser:
     return parser
 
 
-def printer(combo_printer: list) -> set:
-    """Print generated words to stdout and in case apply chosen mutagens (append, prepend, leet)."""
+def printer(combo_printer: List) -> set:
+    """
+    Print generated words to stdout and in case apply chosen mutagens (append, prepend, leet).
+
+    :param combo_printer: a slice of the word list that must be elaborated
+    :type combo_printer: List
+    :return data: set
+    """
     data = set()
     if len(set(map(str.lower, combo_printer))) == len(combo_printer):
         line_printer = ''.join(combo_printer)
@@ -58,8 +72,13 @@ def printer(combo_printer: list) -> set:
         return data
 
 
-def slice_and_run(single_iterator: iter):
-    """Makes slices from iterator and process them via a process pool."""
+def slice_and_run(single_iterator: Iterator):
+    """
+    Makes slices from iterator and process them via a process pool.
+
+    :param single_iterator: Iterator returning permutations to be sliced and sent to printer() func
+    :type single_iterator: Iterator
+    """
     step = 10000000
     start = 0
     check = True
@@ -68,33 +87,29 @@ def slice_and_run(single_iterator: iter):
             while check:
                 check = False
                 cake_slice = islice(single_iterator, start, start + step)
-                data = (result for result in pool.map(printer, cake_slice) if result is not None)
+                data = (result for result in pool.map(printer, cake_slice) if result)
                 for result in data:
-                    if result:
-                        check = True
-                    for word in result:
-                        out_f.write(f'{word}\n')
+                    check = True
+                    out_f.write('\n'.join(result) + '\n')
                 start += step
 
 
-def my_replace(line_to_mutate: str) -> str:
-    leet_replacements = (('o', '0'), ('O', '0'), ('a', '4'), ('A', '4'), ('e', '3'), ('E', '3'),
-                         ('i', '1'), ('I', '1'), ('s', '5'), ('S', '5'))
-    for old_printer, new_printer in leet_replacements:
-        line_to_mutate = line_to_mutate.replace(old_printer, new_printer)
-    return line_to_mutate
+def leet(line_leet: str) -> str:
+    """
+    Generator that returns the leeted version of a string and also returns it with applied prepend
+    and append mutagens if required by user's parameters.
 
+    :param line_leet: the string to be leeted
+    :type line_leet: str
+    :return _: str
+    """
 
-def leet(line_leet: str) -> list:
-    """Apply leet mutagen and then if needed apply append and prepend to leeted version of the string."""
-    data = []
-    line_leet = my_replace(line_leet)
-    data.append(line_leet)
+    line_leet = line_leet.translate(LEET_TRANSLATIONS)
+    yield line_leet
     if args.append is not None:
-        data.append(f'{line_leet}{args.append}')
+        yield f'{line_leet}{args.append}'
     if args.prepend is not None:
-        data.append(f'{args.prepend}{line_leet}')
-    return data
+        yield f'{args.prepend}{line_leet}'
 
 
 def test_printer(x_test: int, out_counter_test: int) -> int:
@@ -119,7 +134,7 @@ def test_printer(x_test: int, out_counter_test: int) -> int:
                     if out_counter_test >= args.test:
                         return out_counter_test
                 if args.leet is True:
-                    line = my_replace(line)
+                    line = line.translate(LEET_TRANSLATIONS)
                     print(line)
                     out_counter_test += 1
                     if out_counter_test >= args.test:
@@ -138,7 +153,14 @@ def test_printer(x_test: int, out_counter_test: int) -> int:
 
 
 def read_input_file(file_path: str) -> set:
-    """Read input file and return a set of words."""
+    """
+    Read input file and return a set of words.
+
+    :param file_path: the path to the file with the user supplied wordlist
+    :type file_path: str
+    :return _: set
+    """
+
     try:
         with open(file_path, 'r') as input_file:
             data = input_file.read().splitlines()
@@ -157,6 +179,7 @@ def read_input_file(file_path: str) -> set:
 
 def test_run():
     """Test run to generate only N words."""
+
     out_counter = 0
     n_perm = args.perm
     n_test = args.test
@@ -166,12 +189,14 @@ def test_run():
             break
 
 
-def real_run():
+def real_run() -> None:
     """Real run."""
+
     input_list = read_input_file(args.input)
     n_perm = args.perm
     for x in range(n_perm):
-        slice_and_run(permutations(input_list, x + 1))
+        my_iterator = permutations(input_list, x + 1)
+        slice_and_run(my_iterator)
 
 
 args = init_argparse().parse_args()
@@ -186,9 +211,9 @@ else:
     definitive = set()
     with open(TEMP_OUTPUT_FILE, 'r') as f_in:
         with open(OUTPUT_FILE, 'a') as f_out:
-            for line in f_in:
-                if line not in definitive:
-                    definitive.add(line)
-                    f_out.write(line)
+            for my_line in f_in:
+                if my_line not in definitive:
+                    definitive.add(my_line)
+                    f_out.write(my_line)
     remove(TEMP_OUTPUT_FILE)
     print('\nOutput saved to \'output.txt\'!\n')
