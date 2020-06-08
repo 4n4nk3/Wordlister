@@ -15,7 +15,7 @@ It makes use of python multiprocessing capabilities in order to speed up his job
  - [x] Multiprocessing
  - [x] Multicore
  - [x] Possibility to adjust cores/processes number manually.
- - [x] Each generated password doesnt contain same word twice.
+ - [x] Each generated password doesn't contain same word twice.
  
 ### Preview:
 
@@ -35,7 +35,7 @@ optional arguments:
   --cap              Activate capitalize mutagen
   --up               Activate uppercase mutagen
   --append APPEND    Append chosen word (append 'word' to all passwords)
-  --prepend PREPEND  Append chosen word (prepend 'word' to all passwords)
+  --prepend PREPEND  Prepend chosen word (prepend 'word' to all passwords)
 
 required arguments:
   --input INPUT      Input file name

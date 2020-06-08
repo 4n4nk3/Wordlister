@@ -43,7 +43,7 @@ def init_argparse() -> argparse.ArgumentParser:
     parser.add_argument('--up', help='Activate uppercase mutagen', action='store_true')
     parser.add_argument('--append', help='Append chosen word (append \'word\' to all passwords)',
                         required=False)
-    parser.add_argument('--prepend', help='Append chosen word (prepend \'word\' to all passwords)',
+    parser.add_argument('--prepend', help='Prepend chosen word (prepend \'word\' to all passwords)',
                         required=False)
     return parser
 
