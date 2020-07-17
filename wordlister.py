@@ -201,19 +201,20 @@ def real_run() -> None:
 
 args = init_argparse().parse_args()
 
-# Test run or real run
-if args.test is not None:
-    test_run()
-else:
-    open(OUTPUT_FILE, 'w').write('')
-    open(TEMP_OUTPUT_FILE, 'w').write('')
-    real_run()
-    definitive = set()
-    with open(TEMP_OUTPUT_FILE, 'r') as f_in:
-        with open(OUTPUT_FILE, 'a') as f_out:
-            for my_line in f_in:
-                if my_line not in definitive:
-                    definitive.add(my_line)
-                    f_out.write(my_line)
-    remove(TEMP_OUTPUT_FILE)
-    print('\nOutput saved to \'output.txt\'!\n')
+if __name__ == '__main__':
+    # Test run or real run
+    if args.test is not None:
+        test_run()
+    else:
+        open(OUTPUT_FILE, 'w').write('')
+        open(TEMP_OUTPUT_FILE, 'w').write('')
+        real_run()
+        definitive = set()
+        with open(TEMP_OUTPUT_FILE, 'r') as f_in:
+            with open(OUTPUT_FILE, 'a') as f_out:
+                for my_line in f_in:
+                    if my_line not in definitive:
+                        definitive.add(my_line)
+                        f_out.write(my_line)
+        remove(TEMP_OUTPUT_FILE)
+        print('\nOutput saved to \'output.txt\'!\n')
