@@ -1,6 +1,6 @@
 # Wordlister
-A simple wordlist generator and mangler written in python 3.8.
-It makes use of python multiprocessing capabilities in order to speed up his job (CPU intensive).
+A simple wordlist generator and mangler written in python 3.10.1.
+It makes use of python multiprocessing capabilities in order to speed up his job.
 
 
 ### Supported permutations:
@@ -11,7 +11,6 @@ It makes use of python multiprocessing capabilities in order to speed up his job
  - [x] Prepend
 
 ### Additional functions:
- - [x] Test/Dry run
  - [x] Multiprocessing
  - [x] Multicore
  - [x] Possibility to adjust cores/processes number manually.
@@ -28,7 +27,6 @@ A simple wordlist generator and mangler written in python.
 
 optional arguments:
   -h, --help         show this help message and exit
-  --test TEST        Output first N iterations (single process/core)
   --cores CORES      Manually specify processes/cores pool that you want to
                      use
   --leet             Activate l33t mutagen
@@ -39,6 +37,7 @@ optional arguments:
 
 required arguments:
   --input INPUT      Input file name
+  --output OUTPUT    Output file name
   --perm PERM        Max number of words to be combined on the same line
   --min MIN          Minimum generated password length
   --max MAX          Maximum generated password length
