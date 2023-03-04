@@ -11,10 +11,8 @@ It makes use of python multiprocessing capabilities in order to speed up his job
  - [x] Prepend
 
 ### Additional functions:
- - [x] Multiprocessing
- - [x] Multicore
- - [x] Possibility to adjust cores/processes number manually.
  - [x] Each generated password doesn't contain same word twice.
+ - [x] Output can be sorted based on the word length.
  
 ### Preview:
 
@@ -27,13 +25,12 @@ A simple wordlist generator and mangler written in python.
 
 optional arguments:
   -h, --help         show this help message and exit
-  --cores CORES      Manually specify processes/cores pool that you want to
-                     use
   --leet             Activate l33t mutagen
   --cap              Activate capitalize mutagen
   --up               Activate uppercase mutagen
   --append APPEND    Append chosen word (append 'word' to all passwords)
   --prepend PREPEND  Prepend chosen word (prepend 'word' to all passwords)
+  --sort             Sort the output in ascending order based on the word length
 
 required arguments:
   --input INPUT      Input file name

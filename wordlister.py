@@ -89,7 +89,8 @@ class Wordlister:
             for perm in permutations(input_words, x + 1):
                 self.printer(perm)
         
-        self.wordlist = sorted(self.wordlist)    
+        if self.args.sort is True:
+            self.wordlist = sorted(self.wordlist, key=len)    
         with open(self.args.output, 'w') as f_out:
             f_out.writelines(self.wordlist)
 
@@ -123,6 +124,8 @@ def init_argparse() -> argparse.ArgumentParser:
                         required=False)
     parser.add_argument('--prepend', help='Prepend chosen word (prepend \'word\' to all passwords)',
                         required=False)
+    parser.add_argument('--sort', help='Sort the output in ascending order based on the word length',
+                        action='store_true')
     return parser
 
 
