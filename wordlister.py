@@ -5,7 +5,6 @@
 import argparse
 from copy import copy
 from itertools import permutations
-from multiprocessing import Pool, current_process
 from os import remove
 from sys import exit, platform
 
@@ -78,8 +77,7 @@ class Wordlister:
         """
         
         result = set()
-        worker_pid = current_process().pid
-        output_file = f'out_worker_{worker_pid}.txt'
+        output_file = 'tmp.txt'
         
         if len(set(map(str.lower, permutation))) == len(permutation):
             line_printer = ''.join(permutation)
@@ -100,9 +98,8 @@ class Wordlister:
 
     def run(self):
         input_words = self.get_input_words(self.args.input)
-        with Pool(self.args.cores) as pool:
-            for x in range(self.args.perm):
-                output_iterable = pool.map(self.printer, permutations(input_words, x + 1))
+        for x in range(self.args.perm):
+            output_iterable = map(self.printer, permutations(input_words, x + 1))
         
         # Remove duplicates leveraging sets' properties
         output_files = set(output_iterable)
