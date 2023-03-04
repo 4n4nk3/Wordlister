@@ -81,7 +81,7 @@ class Wordlister:
         worker_pid = current_process().pid
         output_file = f'out_worker_{worker_pid}.txt'
         
-        if len(set(map(str.lower, permutation))) != len(permutation):
+        if len(set(map(str.lower, permutation))) == len(permutation):
             line_printer = ''.join(permutation)
             if self.args.min <= len(line_printer) <= self.args.max:
                 result.add(line_printer + '\n')
