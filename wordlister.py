@@ -6,12 +6,13 @@ import argparse
 from copy import copy
 from itertools import permutations
 from sys import exit 
+import toml
 
 class Wordlister:
     LEET_TRANSLATIONS = str.maketrans('oOaAeEiIsS', '0044331155')
 
-    def __init__(self, arguments):
-        self.args = arguments
+    def __init__(self, config):
+        self.args = config
         self.wordlist = set()
 
 
@@ -84,52 +85,32 @@ class Wordlister:
 
 
     def run(self):
-        input_words = self.get_input_words(self.args.input)
-        for x in range(self.args.perm):
+        input_words = self.get_input_words(self.config.get("input", {}).get("file_path"))
+        for x in range(self.config.get("generation", {}).get("perm")):
             for perm in permutations(input_words, x + 1):
                 self.printer(perm)
         
-        if self.args.sort is True:
-            self.wordlist = sorted(self.wordlist, key=len)    
-        with open(self.args.output, 'w') as f_out:
+        if self.config.get("generation", {}).get("sort") is True:
+           self.wordlist = sorted(self.wordlist, key=len) 
+        with open(self.config.get("output", {}).get("file_path"), 'w') as f_out:
             f_out.writelines(self.wordlist)
 
-        print(f'\nOutput saved to "{self.args.output}"!\n')
+        print(f'\nOutput saved to "{self.config.get("output", {}).get("file_path")}"!\n')
 
+    
+    def load_config(file_path):
+        try:
+            with open(file_path, 'r') as config_file:
+                config = toml.load(config_file)
+            return config
+        except FileNotFoundError:
+            print('Config file not found!\nExiting...\n')
+            exit(1)
 
-def init_argparse() -> argparse.ArgumentParser:
-    """
-    Define and manage arguments passed to Wordlister via terminal.
+    
 
-    :return argparse.ArgumentParser
-    """
-
-    parser = argparse.ArgumentParser(
-        description='A simple wordlist generator and mangler written in python.')
-    required = parser.add_argument_group('required arguments')
-    # Required arguments
-    required.add_argument('--input', help='Input file name', required=True)
-    required.add_argument('--output', help='Output file name', required=True)
-    required.add_argument('--perm', help='Max number of words to be combined on the same line',
-                          required=True, type=int)
-    required.add_argument('--min', help='Minimum generated password length', required=True,
-                          type=int)
-    required.add_argument('--max', help='Maximum generated password length', required=True,
-                          type=int)
-    # Optional arguments
-    parser.add_argument('--leet', help='Activate l33t mutagen', action='store_true')
-    parser.add_argument('--cap', help='Activate capitalize mutagen', action='store_true')
-    parser.add_argument('--up', help='Activate uppercase mutagen', action='store_true')
-    parser.add_argument('--append', help='Append chosen word (append \'word\' to all passwords)',
-                        required=False)
-    parser.add_argument('--prepend', help='Prepend chosen word (prepend \'word\' to all passwords)',
-                        required=False)
-    parser.add_argument('--sort', help='Sort the output in ascending order based on the word length',
-                        action='store_true')
-    return parser
-
-
-if __name__ == '__main__':
-    args = init_argparse().parse_args()
-    wordlister = Wordlister(arguments=args)
-    wordlister.run()
+    if __name__ == '__main__':
+        # Use a config file instead of command line arguments
+        config = load_config("config.toml")
+        wordlister = Wordlister(arguments=args)
+        wordlister.run()
