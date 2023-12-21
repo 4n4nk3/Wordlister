@@ -1,0 +1,16 @@
+[input]
+file_path = "input.lst"
+
+[output]
+file_path = "output.lst"
+
+[generation]
+perm = 2
+min_length = 2
+max_length = 2
+leet = true
+cap = true
+up = true
+append = "_append"
+prepend = "_prepend"
+sort = true
